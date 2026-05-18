@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/goal.dart';
 import '../repositories/goals_repository.dart';
+import '../repositories/auth_repository.dart';
 
 // Repository Provider
 final goalsRepositoryProvider = Provider<GoalsRepository>((ref) {
@@ -52,6 +53,31 @@ class FocusModeNotifier extends Notifier<bool> {
 }
 
 final focusModeProvider = NotifierProvider<FocusModeNotifier, bool>(FocusModeNotifier.new);
+
+// Auth Repository Provider
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return MockAuthRepository();
+});
+
+class AuthNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    // Initial state
+    return ref.watch(authRepositoryProvider).isConnected;
+  }
+
+  Future<void> signIn(String email, String password) async {
+    await ref.read(authRepositoryProvider).signIn(email, password);
+    state = true;
+  }
+
+  Future<void> signOut() async {
+    await ref.read(authRepositoryProvider).signOut();
+    state = false;
+  }
+}
+
+final authStateProvider = NotifierProvider<AuthNotifier, bool>(AuthNotifier.new);
 
 // Mock Stats Provider
 final statsProvider = Provider<Map<String, String>>((ref) {

@@ -5,6 +5,8 @@ import 'core/theme.dart';
 import 'screens/popup_screen.dart';
 import 'screens/premium_dashboard_screen.dart';
 import 'screens/blocked_screen.dart';
+import 'screens/auth_screen.dart';
+import 'providers/app_providers.dart';
 
 void main() {
   runApp(
@@ -14,48 +16,71 @@ void main() {
   );
 }
 
-final _router = GoRouter(
-  initialLocation: '/',
-  routes: [
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return ScaffoldWithNavBar(navigationShell: navigationShell);
-      },
-      branches: [
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/',
-              builder: (context, state) => const PopupScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/dashboard',
-              builder: (context, state) => const PremiumDashboardScreen(),
-            ),
-          ],
-        ),
-      ],
-    ),
-    GoRoute(
-      path: '/blocked',
-      builder: (context, state) => const BlockedScreen(),
-    ),
-  ],
-);
+final routerProvider = Provider<GoRouter>((ref) {
+  final isConnected = ref.watch(authStateProvider);
+  
+  return GoRouter(
+    initialLocation: '/',
+    redirect: (context, state) {
+      final isAuthPage = state.matchedLocation == '/login';
 
-class LockInApp extends StatelessWidget {
+      if (!isConnected) {
+        return isAuthPage ? null : '/login';
+      }
+
+      if (isAuthPage) {
+        return '/';
+      }
+
+      return null;
+    },
+    routes: [
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return ScaffoldWithNavBar(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const PopupScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                builder: (context, state) => const PremiumDashboardScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/blocked',
+        builder: (context, state) => const BlockedScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const AuthScreen(),
+      ),
+    ],
+  );
+});
+
+class LockInApp extends ConsumerWidget {
   const LockInApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    
     return MaterialApp.router(
       title: 'LockIn',
       theme: AppTheme.themeData,
-      routerConfig: _router,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
     );
   }

@@ -26,7 +26,7 @@ class PopupScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
+                _buildHeader(ref),
                 const SizedBox(height: 24),
                 _buildFocusModeCard(isFocusMode, ref),
                 const SizedBox(height: 24),
@@ -49,7 +49,7 @@ class PopupScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -72,8 +72,10 @@ class PopupScreen extends ConsumerWidget {
           ],
         ),
         IconButton(
-          icon: const Icon(Icons.settings_outlined, color: AppTheme.pine),
-          onPressed: () {},
+          icon: const Icon(Icons.logout_outlined, color: AppTheme.pine),
+          onPressed: () {
+            ref.read(authStateProvider.notifier).signOut();
+          },
         ),
       ],
     );
