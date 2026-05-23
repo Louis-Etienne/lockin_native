@@ -1,41 +1,62 @@
 import 'dart:async';
 
+import 'package:lockin_native_2/domain/auth.dart';
+
 abstract class AuthRepository {
-  Stream<bool> get authStateChange;
-  Future<void> signIn(String email, String password);
-  Future<void> signUp(String email, String password);
-  Future<void> signOut();
-  bool get isConnected;
+  Future<Auth> signIn(String email, String password);
+  Future<Auth> signUp(String email, String password);
+  Future<Auth> signOut();
+  Future<Auth> get();
 }
 
 class MockAuthRepository implements AuthRepository{
-  final _controller = StreamController<bool>.broadcast();
-  bool _isConnected = true;
+
+  String email = "mock@test.com";
+  String? userId;
 
   @override
-  Stream<bool> get authStateChange => _controller.stream;
-
-  @override
-  bool get isConnected => _isConnected;
-
-  @override
-  Future<void> signIn(String email, String password) async{
+  Future<Auth> signIn(String email, String password) async{
     await Future.delayed(const Duration(milliseconds: 800));
-    _isConnected = true;
-    _controller.add(true);
+
+    userId = "userId";
+
+    return Auth(
+      email: email,
+      userId: userId
+    );
   }
 
   @override
-  Future<void> signUp(String email, String password) async{
+  Future<Auth> signUp(String email, String password) async{
     await Future.delayed(const Duration(milliseconds: 800));
-    _isConnected = true;
-    _controller.add(true);
+
+    userId = "userId";
+
+    return Auth(
+      email: email,
+      userId: userId
+    );
   }
 
   @override
-  Future<void> signOut() async{
+  Future<Auth> signOut() async{
     await Future.delayed(const Duration(milliseconds: 800));
-    _isConnected = false;
-    _controller.add(false);
+
+    userId = null;
+
+    return Auth(
+      email: email,
+      userId: userId
+    );
+  }
+
+  @override
+  Future<Auth> get() async{
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    return Auth(
+      email: email,
+      userId: userId
+    );
   }
 }

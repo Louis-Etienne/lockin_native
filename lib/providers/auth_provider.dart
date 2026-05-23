@@ -1,27 +1,42 @@
 
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lockin_native_2/domain/auth.dart';
 import 'package:lockin_native_2/repositories/auth_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref){
   return MockAuthRepository();
 });
 
-class AuthNotifier extends Notifier<bool> {
+class AuthNotifier extends AsyncNotifier<Auth>{
   @override
-  bool build(){
-    return ref.watch(authRepositoryProvider).isConnected;
+  Future<Auth> build() async{
+    return ref.read(authRepositoryProvider).get();
   }
 
-  Future<void> signIn(String email, String password) async{
-    await ref.read(authRepositoryProvider).signIn(email, password);
-    state = true;
+  Future<void> signIn(String email, String password) async {
+    state = AsyncLoading();
+    
+    state = await AsyncValue.guard(() async {
+      return ref.read(authRepositoryProvider).signIn(email, password);
+    });
+  }
+
+  Future<void> signUp(String email, String password) async {
+    state = AsyncLoading();
+    
+    state = await AsyncValue.guard(() async {
+      return ref.read(authRepositoryProvider).signUp(email, password);
+    });
   }
 
   Future<void> signOut() async{
-    await ref.read(authRepositoryProvider).signOut();
-    state = false;
+    state = AsyncLoading();
+    
+    state = await AsyncValue.guard(() async {
+      return ref.read(authRepositoryProvider).signOut();
+    });
   }
 }
 
-final authStateProvider = NotifierProvider<AuthNotifier, bool>(AuthNotifier.new);
+final authProvider = AsyncNotifierProvider<AuthNotifier, Auth>(AuthNotifier.new);

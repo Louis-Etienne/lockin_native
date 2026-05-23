@@ -1,6 +1,5 @@
 
 import 'package:lockin_native_2/components/scaffold_navbar.dart';
-import 'package:lockin_native_2/main.dart';
 import 'package:lockin_native_2/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,14 +10,16 @@ import 'package:lockin_native_2/screens/schedule_screen.dart';
 import 'package:lockin_native_2/screens/stats_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref){
-  final isConnected = ref.watch(authStateProvider);
+  final auth = ref.watch(authProvider);
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state){
       final isAuthPage = state.matchedLocation == "/login";
 
-      if (!isConnected) {
+      final isAuthenticated = auth.value?.isAuthenticated ?? false;
+
+      if (!isAuthenticated) {
         return isAuthPage ? null : "/login";
       }
 

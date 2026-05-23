@@ -1,11 +1,14 @@
 
+import 'package:action_slider/action_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lockin_native_2/components/toggle_whitelist_blacklist.dart';
 import 'package:lockin_native_2/core/app_size.dart';
 import 'package:lockin_native_2/core/app_spacing.dart';
 import 'package:lockin_native_2/core/theme.dart';
-import 'package:slider_button/slider_button.dart';
+import 'package:lockin_native_2/domain/blocked.dart';
+import 'package:lockin_native_2/providers/blocked_provider.dart';
+import 'package:lockin_native_2/providers/lock_in_provider.dart';
 
 class LockInScreen extends ConsumerWidget{
   const LockInScreen({super.key});
@@ -29,8 +32,8 @@ class LockInScreen extends ConsumerWidget{
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  buildLockInCallToAction(),
-                  buildBlocked(),
+                  buildLockInCallToAction(context, ref),
+                  buildBlocked(ref),
                 ],
               ),
             ),
@@ -41,7 +44,7 @@ class LockInScreen extends ConsumerWidget{
   }
 }
 
-Widget buildLockInCallToAction(){
+Widget buildLockInCallToAction(BuildContext context, WidgetRef ref){
   return Card(
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSize.s, horizontal: AppSize.l),
@@ -59,20 +62,35 @@ Widget buildLockInCallToAction(){
           ),
           Text("Lock In now and focus, this will lock your distractions away", textAlign: TextAlign.center,),
           SizedBox(height: AppSpacing.m),
-          sliderCallToAction()
+          sliderCallToAction(context, ref)
         ],
       ),
     ),
   );
 }
 
-Widget sliderCallToAction(){
-  return SliderButton(
-    action: () async{return false;},
-    label: Text(
-      "Slide to focus"
-    ),
-    vibrationFlag: true,
+
+Widget sliderCallToAction(BuildContext context, WidgetRef ref){
+
+  final lockedIn = ref.watch(lockInProvider).value?.isLockedIn ?? false;
+
+  TextDirection sliderDirection = TextDirection.ltr;
+
+  if (lockedIn && Directionality.of(context) == TextDirection.ltr){
+    sliderDirection = TextDirection.rtl;
+  }
+  else if(!lockedIn && Directionality.of(context) == TextDirection.ltr){
+    sliderDirection = TextDirection.ltr;
+  }
+  else if(lockedIn && Directionality.of(context) == TextDirection.rtl){
+    sliderDirection = TextDirection.ltr;
+  }
+  else if(!lockedIn && Directionality.of(context) == TextDirection.rtl){
+    sliderDirection = TextDirection.rtl;
+  }
+
+  return ActionSlider.standard(
+    direction: sliderDirection,
     icon: Center(
       child: Icon(
         Icons.cyclone_rounded,
@@ -80,10 +98,38 @@ Widget sliderCallToAction(){
         semanticLabel: "Slider to start the focus mode",
       ),
     ),
+    child: Text("Slide to focus"),
+    action: (controller) async {
+      controller.loading();
+      await Future.delayed(const Duration(seconds: 3));
+
+      if (lockedIn){
+        ref.read(lockInProvider.notifier).delockIn();
+      }
+      else{
+        ref.read(lockInProvider.notifier).lockIn();
+      }
+
+      controller.success();
+      await Future.delayed(const Duration(seconds: 1));
+      controller.reset();
+    },
   );
 }
 
-Widget buildBlocked(){
+Widget buildBlocked(WidgetRef ref){
+  final state = ref.watch(blockedProvider);
+
+  if (state.isLoading) {
+    return CircularProgressIndicator();
+  }
+
+  if (state.hasError){
+    return Text("Error loading blocked ressources");
+  }
+
+  final blocked = state.value!.blockedRessources;
+
   return Card(
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: AppSize.s, horizontal: AppSize.l),
@@ -105,9 +151,29 @@ Widget buildBlocked(){
               ToggleWhitelistBlacklist()
             ],
           ),
-          SizedBox(height: AppSpacing.m)
+          SizedBox(height: AppSpacing.m),
+
+          ...blocked.map((ressource){
+            return _buildBlockedItem(ressource, ref);
+          }),
         ],
       ),
     )
+  );
+}
+
+Widget _buildBlockedItem(BlockedRessource resource, WidgetRef ref) {
+  return ListTile(
+    title: Text(resource.label),
+    subtitle: Text(resource.runtimeType.toString()),
+
+    trailing: IconButton(
+      icon: Icon(Icons.delete),
+      onPressed: () {
+        ref
+            .read(blockedProvider.notifier)
+            .remove(resource);
+      },
+    ),
   );
 }
