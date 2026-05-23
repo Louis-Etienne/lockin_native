@@ -23,7 +23,7 @@ class MockBlockedRepository extends BlockedRepository{
   Future<Blocked> add(BlockedRessource newBlockedRessource) async {
     ressources.add(newBlockedRessource);
 
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(Duration(milliseconds: 1000));
 
     return Blocked(blockedRessources: ressources);
   }
@@ -32,14 +32,14 @@ class MockBlockedRepository extends BlockedRepository{
   Future<Blocked> remove(BlockedRessource blockedRessource) async {
     ressources.removeWhere((r)=> r.id == blockedRessource.id);
 
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(Duration(milliseconds: 1000));
 
     return Blocked(blockedRessources: ressources);
   }
   
   @override
   Future<Blocked> get() async {
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(Duration(milliseconds: 1000));
 
     return Blocked(blockedRessources: ressources);
   }
