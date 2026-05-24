@@ -8,9 +8,11 @@ import 'package:lockin_native_2/core/app_spacing.dart';
 import 'package:lockin_native_2/core/theme.dart';
 import 'package:lockin_native_2/domain/blocked.dart';
 import 'package:lockin_native_2/domain/device_basket.dart';
+import 'package:lockin_native_2/domain/task_basket.dart';
 import 'package:lockin_native_2/providers/blocked_provider.dart';
 import 'package:lockin_native_2/providers/device_basket_provider.dart';
 import 'package:lockin_native_2/providers/lock_in_provider.dart';
+import 'package:lockin_native_2/providers/task_basket_provider.dart';
 
 class LockInScreen extends ConsumerWidget{
   const LockInScreen({super.key});
@@ -36,7 +38,8 @@ class LockInScreen extends ConsumerWidget{
                 children: [
                   buildLockInCallToAction(context, ref),
                   buildBlocked(context, ref),
-                  buildDeviceBasket(context, ref)
+                  buildDeviceBasket(context, ref),
+                  buildTaskBasket(context, ref)
                 ],
               ),
             ),
@@ -410,5 +413,63 @@ Widget sliderToggleDevice(BuildContext context, WidgetRef ref, Device device){
       },
       child: label,
     ),
+  );
+}
+
+Widget buildTaskBasket(BuildContext context, WidgetRef ref){
+  final state = ref.watch(taskBasketProvider);
+
+  return Card(
+    child: Padding(
+      padding: EdgeInsets.all(AppSpacing.s),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                "Tasks",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                  fontSize: AppSize.m
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.m),
+
+          if (state.isLoading)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(),
+            )
+          else if (state.hasError)
+            const Text("Error loading tasks")
+          else ...[
+            ...state.value!.tasks.map((task) {
+              return _buildTaskItem(context, task, ref);
+            }),
+          ]
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildTaskItem(BuildContext context, Task task, WidgetRef ref){
+  return ListTile(
+    leading: task.isCompleted ? Icon(Icons.check_circle) : Icon(Icons.check_circle_outline),
+    title: Text(task.name, style: TextStyle(fontWeight: FontWeight.bold),),
+    trailing: IconButton(
+      icon: Icon(Icons.more_vert),
+      onPressed: () {},
+    ),
+    onTap: () => {
+      ref.read(taskBasketProvider.notifier).updateTask(
+        task.copyWith(isCompleted: !task.isCompleted)
+      )
+    },
   );
 }
