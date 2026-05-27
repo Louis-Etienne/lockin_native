@@ -1,12 +1,22 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lockin_native_2/core/theme.dart';
 import 'package:lockin_native_2/router.dart';
 
-void main(){
+void main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
   runApp(
-    const ProviderScope(
-      child: LockInApp()
+    EasyLocalization(
+      supportedLocales: [Locale('en')],
+      path: 'assets/translations',
+      fallbackLocale: Locale('en'),
+      child: const ProviderScope(
+        child: LockInApp()
+      ),
     ),
   );
 }
@@ -21,7 +31,10 @@ class LockInApp extends ConsumerWidget{
     return MaterialApp.router(
       title: "LockIn",
       theme: AppTheme.themeData,
-      routerConfig: router
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      routerConfig: router,
     );
   }
 }

@@ -1,0 +1,18 @@
+{
+    "focus_now" : "Focus Now",
+    "focus_now_subtitle": "Lock In now and focus, lock your distractions away",
+    "lock_in_slider_tip": "Slide to focus",
+
+    "blocked_card_title": "Blocked",
+    "create_blocker_button": "Create new blocker",
+    "create_web_blocker": "Create Web Blocker",
+    "create_app_blocker": "Create App Blocker",
+    
+    "devices_card_title": "Devices",
+    "connected_device": "Connected",
+    "not_connected_device": "Not Connected",
+
+    "tasks_card_title": "Tasks",
+
+    "loading_error": "loading error"
+}

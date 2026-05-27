@@ -1,5 +1,6 @@
 
 import 'package:action_slider/action_slider.dart';
+import 'package:easy_localization/easy_localization.dart' as ez;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lockin_native_2/components/toggle_whitelist_blacklist.dart';
@@ -58,7 +59,7 @@ Widget buildLockInCallToAction(BuildContext context, WidgetRef ref){
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Focus Now",
+            context.tr("focus_now"),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppSize.l,
@@ -66,7 +67,7 @@ Widget buildLockInCallToAction(BuildContext context, WidgetRef ref){
               letterSpacing: 1.5
             )
           ),
-          Text("Lock In now and focus, this will lock your distractions away", textAlign: TextAlign.center,),
+          Text(context.tr("focus_now_subtitle"), textAlign: TextAlign.center,),
           SizedBox(height: AppSpacing.m),
           sliderCallToAction(context, ref)
         ],
@@ -81,6 +82,7 @@ Widget sliderCallToAction(BuildContext context, WidgetRef ref){
   final lockedIn = ref.watch(lockInProvider).value?.isLockedIn ?? false;
 
   TextDirection sliderDirection = TextDirection.ltr;
+  
 
   if (lockedIn && Directionality.of(context) == TextDirection.ltr){
     sliderDirection = TextDirection.rtl;
@@ -102,10 +104,10 @@ Widget sliderCallToAction(BuildContext context, WidgetRef ref){
       child: Icon(
         Icons.cyclone_rounded,
         size: AppSize.l,
-        semanticLabel: "Slider to start the focus mode",
+        semanticLabel: context.tr("lock_in_slider_tip"),
       ),
     ),
-    child: Text("Slide to focus"),
+    child: Text(context.tr("lock_in_slider_tip")),
     action: (controller) async {
       controller.loading();
 
@@ -135,7 +137,7 @@ Widget buildBlocked(BuildContext context, WidgetRef ref){
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Blocked",
+                context.tr("blocked_card_title"),
                 style: TextStyle(
                   fontSize: AppSize.m,
                   letterSpacing: 1.5,
@@ -155,7 +157,7 @@ Widget buildBlocked(BuildContext context, WidgetRef ref){
               child: CircularProgressIndicator(),
             )
           else if (state.hasError)
-            const Text("Error loading blocked ressources")
+             Text(context.tr("loading_error"))
           else ...[
             ...state.value!.blockedRessources.map((ressource) {
               return _buildBlockedItem(ressource, ref);
@@ -213,7 +215,7 @@ Widget _buildBlockedAddButtom(BuildContext context){
       ),
       child: Icon(Icons.add),
     ),
-    title: Text("Create new blocker"),
+    title: Text(context.tr("create_blocker_button")),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppSize.s),
       side: BorderSide(
@@ -248,7 +250,7 @@ void showMyAddBlockedModal(BuildContext context){
                   borderRadius: BorderRadius.circular(AppSize.s)
                 ),
               ),
-              title: Text("Create Web Blocker"),
+              title: Text(context.tr("create_web_blocker")),
             ),
 
             ListTile(
@@ -261,7 +263,7 @@ void showMyAddBlockedModal(BuildContext context){
                   borderRadius: BorderRadius.circular(AppSize.s)
                 ),
               ),
-              title: Text("Create App Blocker"),
+              title: Text(context.tr("create_app_blocker")),
             ),
           ]
         ),
@@ -286,7 +288,7 @@ Widget buildDeviceBasket(BuildContext context, WidgetRef ref){
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "Devices",
+                context.tr("devices_card_title"),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
@@ -303,7 +305,7 @@ Widget buildDeviceBasket(BuildContext context, WidgetRef ref){
               child: CircularProgressIndicator(),
             )
           else if (state.hasError)
-            const Text("Error loading devices")
+            Text(context.tr("loading_error"))
           else ...[
             ...state.value!.devices.map((device) {
               return _buildDeviceBasketItem(context, device, ref);
@@ -335,13 +337,13 @@ return ListTile(
           ...[
             Icon(Icons.circle, color: Colors.lightGreenAccent, size: AppSize.s,),
             SizedBox(width: AppSpacing.s,),
-            Text("Connected"),
+            Text(context.tr("connected_device")),
           ]
         else
           ...[
             Icon(Icons.circle, color: Theme.of(context).disabledColor, size: AppSize.s),
             SizedBox(width: AppSpacing.s,),
-            Text("Not connected", style: TextStyle(fontWeight: FontWeight.w100),),
+            Text(context.tr("not_connected_device"), style: TextStyle(fontWeight: FontWeight.w100),),
           ]
       ],
     ),
@@ -429,7 +431,7 @@ Widget buildTaskBasket(BuildContext context, WidgetRef ref){
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "Tasks",
+                context.tr("tasks_card_title"),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
@@ -446,7 +448,7 @@ Widget buildTaskBasket(BuildContext context, WidgetRef ref){
               child: CircularProgressIndicator(),
             )
           else if (state.hasError)
-            const Text("Error loading tasks")
+            Text(context.tr("loading_error"))
           else ...[
             ...state.value!.tasks.map((task) {
               return _buildTaskItem(context, task, ref);
